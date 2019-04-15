@@ -3,18 +3,31 @@ package jogoDos8;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
 import static jogoDos8.Main.*;
 
 public class Nodo implements Comparable<Nodo> {
     private final ArrayList<Integer> quadrados;
     private final int custo;
+    private Nodo nodoPai;
     private  ArrayList<Nodo> filhos;
+
+    public Nodo(ArrayList<Integer> quadrados, int custo, Nodo nodoPai) {
+        this.quadrados = quadrados;
+        this.custo = custo;
+        this.nodoPai = nodoPai;
+    }
 
     public Nodo(ArrayList<Integer> quadrados, int custo) {
         this.quadrados = quadrados;
         this.custo = custo;
+    }
+
+    public Nodo(Nodo nodo) {
+        this.quadrados = nodo.quadrados;
+        this.custo = nodo.getCusto();
+        this.filhos = nodo.filhos;
+        this.nodoPai = nodo.nodoPai;
     }
 
     public ArrayList<Integer> getQuadrados() {
@@ -33,12 +46,55 @@ public class Nodo implements Comparable<Nodo> {
     // Returna o custo do nodo atual em relacao ao nodo objetivo, segundo a nossa heuristica definida,
     // a qual simplesmente conta o numero de casas diferentes do estado atual para o estado objetivo.
     public int getCusto() {
+        int custoTotal = this.custo;
+
+        if (AlGORITMO.equals(Algoritmo.A_ESTRELA_SIMPLES)) {
+            ArrayList<Integer> quadradosObjetivo = OBJETIVO.getQuadrados();
+            for(int i = 0; i < this.quadrados.size(); i++){
+                Integer quadrado = this.quadrados.get(i);
+                Integer quadradoObjetivo = quadradosObjetivo.get(i);
+
+                // Se o quadrado da posicao atual eh diferente do quadrado desta mesma posicao no nodo objetivo,
+                // entao incrementamos o custo em uma unidade.
+                if (quadrado != quadradoObjetivo){
+                    custoTotal += 1;
+                }
+            }
+        }
+
+        if (AlGORITMO.equals(Algoritmo.A_ESTRELA_MELHORADO)) {
+            ArrayList<Integer> quadradosObjetivo = OBJETIVO.getQuadrados();
+            for(int i = 0; i < this.quadrados.size(); i++){
+                Integer quadrado = this.quadrados.get(i);
+                Integer quadradoObjetivo = quadradosObjetivo.get(i);
+
+                // Se o quadrado da posicao atual eh diferente do quadrado desta mesma posicao no nodo objetivo,
+                // entao incrementamos o custo de acordo com a distancia do quadrado em relacao ao seu destino.
+                if (quadrado != quadradoObjetivo){
+                    Integer posicaoAlvo = MAP_OBJETIVO_POSICAO.get(quadrado);
+
+                    int distanciaHorizontal = Math.abs( (posicaoAlvo % 3) - (i % 3) );
+                    int distanciaVertical =  Math.abs( (int)Math.floor(posicaoAlvo / 3) - (int)Math.floor(i / 3) );
+
+                    custoTotal += (distanciaHorizontal + distanciaVertical);
+                }
+            }
+        }
+
+        return custoTotal;
+    }
+
+    // Returna o custo do nodo atual em relacao ao nodo objetivo, segundo a nossa heuristica definida,
+    // a qual simplesmente conta o numero de casas diferentes do estado atual para o estado objetivo.
+    public int getCustoTotal() {
         int custototal = this.custo;
 
-        if (this.filhos != null) {
-            int custoFilho = this.filhos.get(0).getCusto();
-            custototal += custoFilho;
-        }
+//        if (this.filhos != null) {
+//            int custoFilhos = this.filhos.get(0).getCustoTotal();
+//            custototal += custoFilhos;
+//        }
+//
+//
 //        ArrayList<Integer> quadradosObjetivo = OBJETIVO.getQuadrados();
 //        int custoEstado = 0;
 //
@@ -63,11 +119,11 @@ public class Nodo implements Comparable<Nodo> {
         return custototal;
     }
 
-    // Retorna uma lista de nodos filhos que podem ser gerados a partir deste nodo. Os filhos sao todos os nodos
+    // gera os filhos que podem ser gerados a partir deste nodo. Os filhos sao todos os nodos
     // gerados trocando o zero (quadrado vazio) de lugar com as posicoes adjacentes a ele. O metodo recebe uma
     // lista de nodos vizitados, para cada filho gerado temos de excluir todos os que sejam iguais a algum dos
     // estados ja vizitados, pois nao faz sentido gerar um filho que seja igual a um estado ja vizitado.
-    public ArrayList<Nodo> getFilhos(ArrayList<Nodo> estadosVizitados) {
+    public ArrayList<Nodo> expandeNodo(ArrayList<Nodo> caminhoDeOrigem) {
         // Se os filhos já foram gerados anteriormente, simplesmente retornamos eles.
         if (this.filhos != null) {
             return this.filhos;
@@ -122,7 +178,8 @@ public class Nodo implements Comparable<Nodo> {
         // de filhos
         for (Integer posicao: posicoesAdjacentes) {
             // Primeiramente criamos ma copia das posicoes do nodo.
-            ArrayList<Integer> quadradosCopiado = new ArrayList(List.copyOf(this.quadrados));
+            ArrayList<Integer> quadradosCopiado = new ArrayList<>();
+            quadradosCopiado.addAll(this.quadrados);
 
             // Salvamos o valor que estava armazenado na posicao que queremos trocar (colocar um zero)
             Integer valorSalvo = quadradosCopiado.get(posicao);
@@ -135,25 +192,18 @@ public class Nodo implements Comparable<Nodo> {
 
             // Criamos um novo nodo com a posicao do zero ja trocada corretamente. O custo dos filhos eh iqual ao
             // custo do nodo mais um.
-            Nodo filho = new Nodo(quadradosCopiado, (this.custo + 1));
+            Nodo filho = new Nodo(quadradosCopiado, (getCusto() + 1));
 
             // Adicionamos o filho criado na lista de filhos, primeiramente verificando se ele nao esta ja na
-            // lista de estados vizitados.
-            if (!estadosVizitados.contains(filho)) {
+            // no caminho de onde esse nodo foi originado, evitando que ande em "circulos".
+            if (!caminhoDeOrigem.contains(filho)) {
                 filhos.add(filho);
             }
         }
-        System.out.println("Filhos na ordem original: " + filhos.toString());
-        for(Nodo nodo : filhos){
-            imprimeNodo(nodo);
-        }
+
         // Ordenamos a lista de filhos do menor para o maior.
         Collections.sort(filhos);
 
-        System.out.println("Filhos na ordem crescente: " + filhos.toString());
-        for(Nodo nodo : filhos){
-            imprimeNodo(nodo);
-        }
         // Adicionamos os filhos ordenados nos filhos do nodo, para simplesmente retornarmos eles se o metodo
         // for chamado de novo.
         this.filhos = filhos;

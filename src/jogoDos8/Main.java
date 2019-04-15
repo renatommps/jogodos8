@@ -6,18 +6,24 @@ public class Main {
 
     public static Map<Integer, Integer> MAP_OBJETIVO_POSICAO = new HashMap<>();
     public static Nodo OBJETIVO;
+    public static Algoritmo AlGORITMO;
 
     public static void main(String[] args) {
         System.out.println("Bem vindo ao jogo dos 8!");
-        Algoritmo algoritmo = defineAlgoritmo();
+
+        defineAlgoritmo();
         Nodo estadoFinal = defineEstadoFinal();
         Nodo estadoInicial = geraEstadoInicial();
 
-        Tabuleiro tabuleiro = new Tabuleiro(estadoInicial, estadoFinal, algoritmo);
+        System.out.println("Algoritmo definido: " + AlGORITMO.getDescricao());
+        System.out.println("Estado inicial aleatorio gerado:");
+        imprimeNodo(estadoInicial);
+
+        Tabuleiro tabuleiro = new Tabuleiro(estadoInicial, estadoFinal);
 
         try {
-            List<Nodo> caminho = tabuleiro.acharCaminho();
-            imprimeCaminho(caminho);
+            ResultadoBusca resultadoBusca = tabuleiro.acharCaminho();
+            resultadoBusca.imprimeTela();
         } catch (Exception erro) {
             System.out.println("Algum erro aconteceu!" + erro);
         }
@@ -45,20 +51,52 @@ public class Main {
         return estadoFinal;
     }
 
-    private static Algoritmo defineAlgoritmo() {
-        // TODO utilizar esse metodo para ler uma das 3 opcaoes possiveis atravez de input do usuario.
-        //Scanner scaner = new Scanner(System.in);
+    private static void defineAlgoritmo() {
+        System.out.println("Defina qual sera o algoritmo utilizado. (Digite o numero correspondente)");
 
-        //scaner.next();
+        // Pegamos todos os algoritmos disponiveis definidos.
+        Algoritmo[] algoritmos = Algoritmo.values();
+        // Inicializamos o contador de algoritmo utilizado para imprimir na tela todos os algoritmos com `1`;
+        int contador = 1;
 
-        return Algoritmo.CUSTO_UNIFORME;
+        // para cada algoritmo disponivel, imprimimos a descricao dele na tela junto com seu numero correspondente
+        for (Algoritmo algoritmo : algoritmos) {
+            System.out.println((contador++) + " - " + algoritmo.getDescricao());
+        }
+
+        // Criamos um `Scanner` para ler a opcao digitada pelo usuario.
+        Scanner scaner = new Scanner(System.in);
+
+        // Lemos a opcao digitada
+        int escolha = scaner.nextInt();
+
+        // Se o valor digitado eh menor que `1` ou maior que o comprimento da lista de algoritmos menos um
+        // (subtraimos `1` porque array comeca em `0`, e nao em `1`), entao definimos por padrao a escolha como
+        // `0`, para pegar o primeiro algoritmo da lista, que no caso eh `CUSTO_UNIFORME`.
+        if ( (escolha < 1) || (escolha > (algoritmos.length)) ) {
+            escolha = 0;
+        } else {
+            // Se a escolha foi valida, subtraimos em `1` para pegarmos a posivao correta no array, ja que ele
+            // comeca em `0` e nao em `1`.
+            escolha = escolha - 1;
+        }
+
+        // Definimos qual o algoritmo escolhido.
+        Algoritmo algoritmoEscolhido = algoritmos[escolha];
+
+        // Seta a variavel statica ALGORITMO com o algoritmo escolhido.
+        AlGORITMO = algoritmoEscolhido;
     }
 
     private static Nodo geraEstadoInicial() {
-        // TODO utilizar esse metodo para gerar um estado inicial inicial aleatorio.
         // Definimos a ordem dos quadrados do estado inicial aleatoriamente.
-        ArrayList<Integer> quadrados = new ArrayList<>(Arrays.asList(1, 0, 3, 4, 2, 6, 7, 5, 8));
-
+        ArrayList<Integer> quadrados = new ArrayList<>(Arrays.asList(1, 3, 6, 4, 0, 2, 7, 5, 8));
+//        ArrayList<Integer> quadrados = new ArrayList<>(Arrays.asList(
+//                1, 3, 0,
+//                7, 4, 5,
+//                5, 8, 2)
+//        );
+        //ArrayList<Integer> quadrados = new ArrayList<>(Arrays.asList(5, 0, 3, 1, 8, 6, 7, 4, 2));
         // O estado inicial tem custo zero.
         int custo = 0;
 
@@ -69,16 +107,13 @@ public class Main {
         return estadoInicial;
     }
 
-    private static void imprimeCaminho(List<Nodo> caminho) {
-        System.out.println("Tamanho do caminho total percorrido: " +  caminho.size());
-        System.out.println("Caminho percorrido:");
-
+    public static void imprimeCaminho(List<Nodo> caminho) {
         for(Nodo nodo : caminho){
             imprimeNodo(nodo);
         }
     }
 
-    public static void imprimeNodo(Nodo nodo) {
+    private static void imprimeNodo(Nodo nodo) {
         int posicaoLinha = 1;
 
         for(int posicao : nodo.getQuadrados()) {

@@ -1,33 +1,98 @@
 package jogoDos8;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class Tabuleiro {
     private final Nodo estadoInicial;
     private final Nodo estadoFinal;
-    private final Algoritmo algoritmo;
     private final ArrayList<Nodo> estadosVizitados;
-    private final ArrayList<Nodo> fronteira;
+    private final ArrayList<Caminho> fronteira;
+    private  Nodo estadoAtual;
+    private int maiorTamanhoDaFronteira;
 
-    public Tabuleiro(Nodo estadoInicial, Nodo estadoFinal, Algoritmo algoritmo) {
+    public Tabuleiro(Nodo estadoInicial, Nodo estadoFinal) {
         this.estadoInicial = estadoInicial;
+        this.estadoAtual = estadoInicial;
         this.estadoFinal = estadoFinal;
-        this.algoritmo = algoritmo;
         this.estadosVizitados = new ArrayList<>();
         this.fronteira = new ArrayList<>();
+        this.maiorTamanhoDaFronteira = 0;
     }
 
-    public List<Nodo> acharCaminho() {
-        // Definimos o estado atual com o estado inicial.
-        Nodo estadoAtual = this.estadoInicial;
-
+    public ResultadoBusca acharCaminho() {
         // Adicionamos o estado atual na fronteira (caminho percorrido ate entao).
-        this.fronteira.add(estadoAtual);
+        Caminho caminhoAtual = new Caminho(this.estadoAtual);
+
+        this.fronteira.add(caminhoAtual);
 
         // Chamamos `acharCaminho` passando o estado atual.
-        return acharCaminho(estadoAtual);
+        return buscaObjetivo();
+    }
+
+    private ResultadoBusca buscaObjetivo() {
+        while (!this.estadoAtual.equals(this.estadoFinal) && (this.fronteira.size() > 0)) {
+
+            //System.out.println("Tamanho da fronteira: " + this.fronteira.size());
+
+            // Atualiza o maior tamanho da fronteira caso a fronteira atual seja maior que o maior ja estabelecido.
+            if (this.fronteira.size() > this.maiorTamanhoDaFronteira) {
+                this.maiorTamanhoDaFronteira = this.fronteira.size();
+            }
+
+            // Adicionamos o estado atual passado na lista de estados já vizitados.
+            adicionaNosEstadosVisitados(this.estadoAtual);
+
+            // pega o menor caminho (primeira posicao na fronteira, pois a mesma eh ordenada)
+            Caminho menorCaminho = this.fronteira.get(0);
+
+            // Expande o estado atual e pega os seus filhos filhos (ja ordenados) criados.
+            ArrayList<Nodo> filhos = this.estadoAtual.expandeNodo(menorCaminho.getNodos());
+
+            if (filhos.size() > 0) {
+                ArrayList<Caminho> fronteirasExpandidas = new ArrayList<>();
+
+                for (Nodo filho: filhos) {
+                    ArrayList<Nodo> nodosEspandidos = new ArrayList<>();
+                    nodosEspandidos.addAll(menorCaminho.getNodos());
+                    nodosEspandidos.add(filho);
+
+                    Caminho caminhoExpandido = new Caminho(nodosEspandidos);
+
+                    fronteirasExpandidas.add(caminhoExpandido);
+                }
+
+                this.fronteira.remove(0);
+                this.fronteira.addAll(fronteirasExpandidas);
+                Collections.sort(this.fronteira);
+
+                Caminho novoMenorCaminho = this.fronteira.get(0);
+                ArrayList<Nodo> nodosNovoMenorCaminho = novoMenorCaminho.getNodos();
+
+                this.estadoAtual = nodosNovoMenorCaminho.get(nodosNovoMenorCaminho.size() - 1);
+
+                //System.out.println("Nodos do novo melhor caminho: " + nodosNovoMenorCaminho.toString());
+                //System.out.println("Estado atual atualizado! estado atual: " + this.estadoAtual.toString());
+            } else {
+                // Se chegamos aqui, eh porque nao estamos no estado final, e o nodo atual nao tem mais filhos
+                // para serem espandidos, chegamos num beco sem saida. Esse estado nao deveria acontecer, e seria um
+                // erro. Caso acontece, simplesmente printamos uma mensagem na tela e retornamos o menor caminho
+                // gerado ate entao so para retornar algo.
+                this.fronteira.remove(0);
+                Caminho novoMenorCaminho = this.fronteira.get(0);
+                ArrayList<Nodo> nodosNovoMenorCaminho = novoMenorCaminho.getNodos();
+
+                this.estadoAtual = nodosNovoMenorCaminho.get(nodosNovoMenorCaminho.size() - 1);
+//                System.out.println("Nao foi possivel encontrar o nodo objetivo. Nosso algoritmo tem algo de errado!");
+//                System.out.println("Numero de nodos ja vizitados: " + this.estadosVizitados.size());
+//                return this.fronteira.get(0).getNodos();
+            }
+        }
+
+        // Cria um resultado de busca.
+        ResultadoBusca resultado = new ResultadoBusca(fronteira.get(0).getNodos(), this.estadosVizitados, this.maiorTamanhoDaFronteira);
+
+        // Retorna o resultado de busca criado.
+        return resultado;
     }
 
     private void adicionaNosEstadosVisitados(Nodo estado) {
@@ -36,47 +101,5 @@ public class Tabuleiro {
         if (!this.estadosVizitados.contains(estado)) {
             this.estadosVizitados.add(estado);
         }
-    }
-
-    private List<Nodo> acharCaminho(Nodo estadoAtual) {
-        // Adicionamos o estado atual passado na lista de estados já vizitados.
-        adicionaNosEstadosVisitados(estadoAtual);
-
-        if (!estadoAtual.equals(this.estadoFinal)) {
-            // Pega os filhos (ja ordenados) do nodo atual.
-            ArrayList<Nodo> filhos = estadoAtual.getFilhos(this.estadosVizitados);
-
-            while (filhos.size() > 0) {
-                // se o estado atual tem pelo menos um filho, pegamos o primeiro (que eh o com o menor custo).
-                Nodo menorFilho = filhos.remove(0);
-
-                // Adicionamos o menor filho na fronteira (caminho percorrido ate entao).
-                fronteira.add(menorFilho);
-
-                // Se o nodo com o menor caminho nao eh o nodo objetivo, chamanos recursivamente o `acharCaminho`
-                // passando ele como parametro.
-                if (!menorFilho.equals(this.estadoFinal)) {
-                    List<Nodo> caminho = acharCaminho(menorFilho);
-
-                    // pegamos o ultimo filho gerado a partir desse caminho.
-                    Nodo ultimoFilhoDoCaminho = caminho.get(caminho.size() - 1);
-
-                    // Se o ultimo filho nao for o nodo objetivo, retornamos a fronteira gerada recursivamente,
-                    // caso contrario, nao fazemos nada, pois o caminho gerado a partir desse filho nao levou
-                    // ate o objetivo, e devemos novamente pegar o primeiro filho da lista de filhos, ate que a mesma
-                    // esteja vazia.
-                    if (ultimoFilhoDoCaminho.equals(this.estadoFinal)) {
-                        return this.fronteira;
-                    }
-                } else {
-                    return this.fronteira;
-                }
-            }
-            System.out.println("nao achamos o objetivo :(");
-        }
-
-        System.out.println("nao achamos o objetivo :(");
-
-        return this.fronteira;
     }
 }
