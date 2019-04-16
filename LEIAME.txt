@@ -1,0 +1,7 @@
+Como rodar o programa:
+
+1 - Compile os arquivos .java com o seguinte comando, executando o mesmo na pasta onde se encontram os .java do projeto com todas as classes
+javac *.java
+
+2 - Rode o Main.class gerado com o seguinte comando, que deve ser rodado uma pasta acima (a pasta "jogoDos8"):
+java jogoDos8.main
