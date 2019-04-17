@@ -12,22 +12,10 @@ public class Nodo implements Comparable<Nodo> {
     private Nodo nodoPai;
     private  ArrayList<Nodo> filhos;
 
-    public Nodo(ArrayList<Integer> quadrados, int custo, Nodo nodoPai) {
-        this.quadrados = quadrados;
-        this.custo = custo;
-        this.nodoPai = nodoPai;
-    }
 
     public Nodo(ArrayList<Integer> quadrados, int custo) {
         this.quadrados = quadrados;
         this.custo = custo;
-    }
-
-    public Nodo(Nodo nodo) {
-        this.quadrados = nodo.quadrados;
-        this.custo = nodo.getCusto();
-        this.filhos = nodo.filhos;
-        this.nodoPai = nodo.nodoPai;
     }
 
     public ArrayList<Integer> getQuadrados() {
@@ -43,7 +31,7 @@ public class Nodo implements Comparable<Nodo> {
         return -1;
     }
 
-    // Returna o custo do nodo atual em relacao ao nodo objetivo, segundo a nossa heuristica definida,
+    // Retorna o custo do nodo atual em relacao ao nodo objetivo, segundo a nossa heuristica definida,
     // a qual simplesmente conta o numero de casas diferentes do estado atual para o estado objetivo.
     public int getCusto() {
         int custoTotal = this.custo;
@@ -82,41 +70,6 @@ public class Nodo implements Comparable<Nodo> {
         }
 
         return custoTotal;
-    }
-
-    // Returna o custo do nodo atual em relacao ao nodo objetivo, segundo a nossa heuristica definida,
-    // a qual simplesmente conta o numero de casas diferentes do estado atual para o estado objetivo.
-    public int getCustoTotal() {
-        int custototal = this.custo;
-
-//        if (this.filhos != null) {
-//            int custoFilhos = this.filhos.get(0).getCustoTotal();
-//            custototal += custoFilhos;
-//        }
-//
-//
-//        ArrayList<Integer> quadradosObjetivo = OBJETIVO.getQuadrados();
-//        int custoEstado = 0;
-//
-//        for(int i = 0; i < this.quadrados.size(); i++){
-//            Integer quadrado = this.quadrados.get(i);
-//            Integer quadradoObjetivo = quadradosObjetivo.get(i);
-//
-//            // Se o quadrado da posicao atual eh diferente do quadrado desta mesma posicao no nodo objetivo,
-//            // entao incrementamos o custo em uma unidade.
-//            if (quadrado != quadradoObjetivo){
-//                Integer posicaoAlvo = MAP_OBJETIVO_POSICAO.get(quadrado);
-//
-//                int distanciaHorizontal = Math.abs( (posicaoAlvo % 3) - (i % 3) );
-//                int distanciaVertical =  Math.abs( (int)Math.floor(posicaoAlvo / 3) - (int)Math.floor(i / 3) );
-//
-//                custoEstado += (distanciaHorizontal + distanciaVertical);
-//            }
-//        }
-
-        // Retorna o custo total.
-        //return custoEstado;
-        return custototal;
     }
 
     // gera os filhos que podem ser gerados a partir deste nodo. Os filhos sao todos os nodos

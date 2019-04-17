@@ -24,6 +24,8 @@ public class Tabuleiro {
         Caminho caminhoAtual = new Caminho(this.estadoAtual);
 
         this.fronteira.add(caminhoAtual);
+        this.maiorTamanhoDaFronteira = this.fronteira.size();
+        adicionaNosEstadosVisitados(this.estadoAtual);
 
         // Chamamos `acharCaminho` passando o estado atual.
         return buscaObjetivo();
@@ -31,8 +33,6 @@ public class Tabuleiro {
 
     private ResultadoBusca buscaObjetivo() {
         while (!this.estadoAtual.equals(this.estadoFinal) && (this.fronteira.size() > 0)) {
-
-            //System.out.println("Tamanho da fronteira: " + this.fronteira.size());
 
             // Atualiza o maior tamanho da fronteira caso a fronteira atual seja maior que o maior ja estabelecido.
             if (this.fronteira.size() > this.maiorTamanhoDaFronteira) {
@@ -69,22 +69,24 @@ public class Tabuleiro {
                 ArrayList<Nodo> nodosNovoMenorCaminho = novoMenorCaminho.getNodos();
 
                 this.estadoAtual = nodosNovoMenorCaminho.get(nodosNovoMenorCaminho.size() - 1);
-
-                //System.out.println("Nodos do novo melhor caminho: " + nodosNovoMenorCaminho.toString());
-                //System.out.println("Estado atual atualizado! estado atual: " + this.estadoAtual.toString());
             } else {
                 // Se chegamos aqui, eh porque nao estamos no estado final, e o nodo atual nao tem mais filhos
-                // para serem espandidos, chegamos num beco sem saida. Esse estado nao deveria acontecer, e seria um
-                // erro. Caso acontece, simplesmente printamos uma mensagem na tela e retornamos o menor caminho
+                // para serem espandidos, chegamos num beco sem saida, o que pode significar que o nosso algoritmo
+                // esta errado, ou (na melhor das hopoteses :) ) que o usuario entrou com um estado inicial impossivel
+                // de achar o estado final. Esse estado nao deveria acontecer, e seria um
+                // erro. Nesse caso, simplesmente printamos uma mensagem na tela e retornamos o menor caminho
                 // gerado ate entao so para retornar algo.
                 this.fronteira.remove(0);
                 Caminho novoMenorCaminho = this.fronteira.get(0);
                 ArrayList<Nodo> nodosNovoMenorCaminho = novoMenorCaminho.getNodos();
 
                 this.estadoAtual = nodosNovoMenorCaminho.get(nodosNovoMenorCaminho.size() - 1);
-//                System.out.println("Nao foi possivel encontrar o nodo objetivo. Nosso algoritmo tem algo de errado!");
-//                System.out.println("Numero de nodos ja vizitados: " + this.estadosVizitados.size());
-//                return this.fronteira.get(0).getNodos();
+                System.out.println("Nao foi possivel encontrar o nodo objetivo a partir do estado inicial informado!" +
+                        " O resultado retornado eh invalido!");
+                ResultadoBusca resultado = new ResultadoBusca(fronteira.get(0).getNodos(), this.estadosVizitados, this.maiorTamanhoDaFronteira);
+
+                // Retorna o resultado de busca criado.
+                return resultado;
             }
         }
 

@@ -16,7 +16,7 @@ public class Main {
         Nodo estadoInicial = geraEstadoInicial();
 
         System.out.println("Algoritmo definido: " + AlGORITMO.getDescricao());
-        System.out.println("Estado inicial aleatorio gerado:");
+        System.out.println("Estado inicial definido:");
         imprimeNodo(estadoInicial);
 
         Tabuleiro tabuleiro = new Tabuleiro(estadoInicial, estadoFinal);
@@ -67,7 +67,7 @@ public class Main {
         // Criamos um `Scanner` para ler a opcao digitada pelo usuario.
         Scanner scaner = new Scanner(System.in);
 
-        // Lemos a opcao digitada
+        // Le a opcao digitada pelo usuario.
         int escolha = scaner.nextInt();
 
         // Se o valor digitado eh menor que `1` ou maior que o comprimento da lista de algoritmos menos um
@@ -89,19 +89,45 @@ public class Main {
     }
 
     private static Nodo geraEstadoInicial() {
-        // Definimos a ordem dos quadrados do estado inicial aleatoriamente.
-        ArrayList<Integer> quadrados = new ArrayList<>(Arrays.asList(1, 3, 6, 4, 0, 2, 7, 5, 8));
-//        ArrayList<Integer> quadrados = new ArrayList<>(Arrays.asList(
-//                1, 3, 0,
-//                7, 4, 5,
-//                5, 8, 2)
-//        );
-        //ArrayList<Integer> quadrados = new ArrayList<>(Arrays.asList(5, 0, 3, 1, 8, 6, 7, 4, 2));
+        // Criamos um `Scanner` para ler as opcoes digitadas pelo usuario.
+        Scanner scaner = new Scanner(System.in);
+
+        // Criamos uma lista vazia para armazenar os valores do estado inicial.
+        ArrayList<Integer> valoresEstadoInicial = new ArrayList<>();
+
+        // Criamos um contador para armazenar a posicao atual do tabuleiro que o usuario deve informar.
+        int posicaoAtual = 1;
+
+        System.out.println("Defina os valores do estado inical do jogo.");
+        System.out.println("Digite 9 numeros inteiros que representam os valores das posicoes do tabuleiro do jogo, " +
+                "(de cima pra baixo, da esquerda para a direita (zero representa a posicao vazia).");
+
+        while (valoresEstadoInicial.size() < 9) {
+            System.out.println();
+            System.out.println("Valores ja informados: " + valoresEstadoInicial.toString());
+            System.out.println("Entre com um valor para a posicao " + posicaoAtual +  " do tabuleiro:");
+
+            // Le o valor informado pelo usuario.
+            int valor = scaner.nextInt();
+
+            // Valida o valor informado.
+            if ( (valor < 0) || (valor > 8)) {
+                System.out.println("Valor " + valor +  " digitado invalido! o valor deve ser maior ou igual a zero, " +
+                    "e menor que nove!");
+            } else if (valoresEstadoInicial.contains(valor)) {
+                System.out.println("Valor " + valor +  " digitado invalido! esse valor ja foi adicionado! " +
+                        "Favor informar um valor diferente.");
+            } else {
+                // Se o valor digitado for valido, insere na lista.
+                valoresEstadoInicial.add(valor);
+            }
+        }
+
         // O estado inicial tem custo zero.
         int custo = 0;
 
         // Criamos o nodo de estado inicial.
-        Nodo estadoInicial = new Nodo(quadrados, custo);
+        Nodo estadoInicial = new Nodo(valoresEstadoInicial, custo);
 
         // Retornamos o estado inicial.
         return estadoInicial;
