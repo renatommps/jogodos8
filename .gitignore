@@ -1,8 +1,5 @@
 # Don't track content of these folders
 **/.idea/*
-/out/
-
-
 
 # Compiled source #
 ###################
@@ -23,7 +20,6 @@
 *.dmg
 *.gz
 *.iso
-*.jar
 *.rar
 *.tar
 *.zip

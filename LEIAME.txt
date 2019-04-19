@@ -1,5 +1,12 @@
-Como rodar o programa:
+﻿Como rodar o programa:
+OPÇÂO 1
+OBS: o nosso programa foi feito e gerado usando windows, dependendo do sistema operacional, talvez o Projeto.jar não rode como deveria, caso isso aconteça, o programa deve ser gerado com a OPÇÂO 2
 
+rode o arquivo Projeto.jar com o seguinte comando:
+java -jar Projeto.jar
+
+
+OPÇÂO 2
 1 - Compile os arquivos .java com o seguinte comando, executando o mesmo na pasta onde se encontram os .java do projeto com todas as classes
 javac *.java
 

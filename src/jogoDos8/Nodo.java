@@ -9,9 +9,7 @@ import static jogoDos8.Main.*;
 public class Nodo implements Comparable<Nodo> {
     private final ArrayList<Integer> quadrados;
     private final int custo;
-    private Nodo nodoPai;
     private  ArrayList<Nodo> filhos;
-
 
     public Nodo(ArrayList<Integer> quadrados, int custo) {
         this.quadrados = quadrados;
